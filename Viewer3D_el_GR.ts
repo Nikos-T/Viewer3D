@@ -4,7 +4,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="mainwindow.cpp" line="5"/>
+        <location filename="mainwindow.cpp" line="4"/>
         <source>Viewer 3D</source>
         <translation>Παρατηρητής 3D</translation>
     </message>

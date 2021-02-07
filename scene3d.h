@@ -26,6 +26,8 @@ public:
 	Scene3D(QWidget *parent = 0);
 	~Scene3D();
 
+	QSize sizeHint() const override;
+	
 protected:
 	void initializeGL() override;
 	void paintGL() override;

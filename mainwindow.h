@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDockWidget>
+#include <QTextEdit>
 #include "scene3d.h"
 
 class MainWindow : public QMainWindow

@@ -5,6 +5,8 @@
 
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {
+	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
 	float vertices[] = {
 			0.5f,  0.5f, 0.f, 1.f, 1.f, 1.f,	// top right
 			0.5f, -0.5f, 0.f, 1.f, 0.f, 0.f,	// bottom right
@@ -51,6 +53,11 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 Scene3D::~Scene3D()
 {
 	
+}
+
+QSize Scene3D::sizeHint() const
+{
+	return QSize(400, 400);
 }
 
 void Scene3D::initializeGL()
