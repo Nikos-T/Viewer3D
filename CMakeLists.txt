@@ -24,10 +24,12 @@ set(PROJECT_SOURCES
 	mainwindow.h
 	scene3d.cpp
 	scene3d.h
-        shaderprogram.cpp
-        shaderprogram.h
-        shaders/default.vert
-        shaders/default.frag
+    shaderprogram.cpp
+    shaderprogram.h
+    shaders/default.vert
+    shaders/default.frag
+	stb_image.h
+	origin/learnOpenGL-Textures
 	${TS_FILES}
 )
 
