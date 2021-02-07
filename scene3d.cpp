@@ -61,6 +61,7 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 	QDir imagePath = QDir(QApplication::applicationDirPath() + "/../resources/container.jpg");
 	mp_textureData = stbi_load(imagePath.absolutePath().toUtf8(), &m_width, &m_height, &m_nrChannels, 0);
 	qDebug() << sizeof(mp_textureData) << m_width << m_height << m_nrChannels;
+
 }
 
 Scene3D::~Scene3D()
@@ -137,21 +138,6 @@ void Scene3D::initializeGL()
 	glGenVertexArrays(1, &m_vao);
 	glGenBuffers(1, &m_vbo);
 	glGenBuffers(1, &m_ebo);
-	
-	if (mp_textureData) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, mp_textureData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		qDebug() << "Failed to load texture";
-	}
-	glGenTextures(1, &m_texture);  
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, mp_textureData);
-	glGenerateMipmap(GL_TEXTURE_2D);
 	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
 	glBindVertexArray(m_vao);
 
@@ -161,28 +147,39 @@ void Scene3D::initializeGL()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(mp_indices), mp_indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, N_AXES, GL_FLOAT, GL_FALSE, (N_AXES+N_COLORARGS) * sizeof(float), reinterpret_cast<void *>(0));
+	glVertexAttribPointer(0, N_AXES, GL_FLOAT, GL_FALSE, (N_AXES+N_COLORARGS+N_TEXAXES) * sizeof(float), reinterpret_cast<void *>(0));
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, N_COLORARGS, GL_FLOAT, GL_FALSE, (N_AXES+N_COLORARGS) * sizeof(float), reinterpret_cast<void *>(N_AXES*sizeof(float)));
+	glVertexAttribPointer(1, N_COLORARGS, GL_FLOAT, GL_FALSE, (N_AXES+N_COLORARGS+N_TEXAXES) * sizeof(float), reinterpret_cast<void *>(N_AXES*sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, (N_AXES+N_COLORARGS+N_TEXAXES) * sizeof(float), reinterpret_cast<void *>((N_AXES+N_COLORARGS)*sizeof(float)));
+	glVertexAttribPointer(2, N_TEXAXES, GL_FLOAT, GL_FALSE, (N_AXES+N_COLORARGS+N_TEXAXES) * sizeof(float), reinterpret_cast<void *>((N_AXES+N_COLORARGS)*sizeof(float)));
 	glEnableVertexAttribArray(2); 
 
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2); 
-	stbi_image_free(mp_textureData);
+ 
 	// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 	// glBindVertexArray(0); 
+	
+	glGenTextures(1, &m_texture); 
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (mp_textureData) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, mp_textureData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	} else {
+		qDebug() << "Failed to load texture";
+	}
+	stbi_image_free(mp_textureData);
+
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	// mp_timer->start();
 	connect(mp_timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -191,8 +188,8 @@ void Scene3D::initializeGL()
 void Scene3D::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(m_shaderProgram);
 
+	glUseProgram(m_shaderProgram);
 	// if (m_green < 1.f) {
 	// 	m_green += 0.005f;
 	// } else {
@@ -205,6 +202,7 @@ void Scene3D::paintGL()
 	// 	qDebug() << "Couldn't find \"ourColor\"";
 	// }
 
+	// glBindTexture(GL_TEXTURE_2D, m_texture);
 	// glBindVertexArray(m_vao); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 	glDrawElements(GL_TRIANGLES, N_ELEMENTS*N_ELEMENTITEMS, GL_UNSIGNED_INT, 0);
 	// glDrawArrays(GL_TRIANGLES, 0, sizeof(mp_vertices)/(3*sizeof(float)));
