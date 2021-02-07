@@ -36,7 +36,7 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 	
 
 	// texture
-	QDir imagePath = QDir(QApplication::applicationDirPath() + "/../resources/container.jpg");
+    QDir imagePath = QDir(QApplication::applicationDirPath() + "/resources/container.jpg");
 	mp_textureData = stbi_load(imagePath.absolutePath().toUtf8(), &m_width, &m_height, &m_nrChannels, 0);
 	qDebug() << sizeof(mp_textureData) << m_width << m_height << m_nrChannels;
 
@@ -126,7 +126,6 @@ void Scene3D::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(m_shaderProgram);
 	// if (m_green < 1.f) {
 	// 	m_green += 0.005f;
 	// } else {

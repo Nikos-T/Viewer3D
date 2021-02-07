@@ -24,17 +24,19 @@ set(PROJECT_SOURCES
 	mainwindow.h
 	scene3d.cpp
 	scene3d.h
-    shaderprogram.cpp
-    shaderprogram.h
-    shaders/default.vert
-    shaders/default.frag
+        shaderprogram.cpp
+        shaderprogram.h
+        shaders/default.vert
+        shaders/default.frag
 	stb_image.h
-	origin/learnOpenGL-Textures
+        resources/container.jpg
+
 	${TS_FILES}
 )
 
 configure_file(shaders/default.vert shaders/default.vert COPY_ONLY)
 configure_file(shaders/default.frag shaders/default.frag COPY_ONLY)
+configure_file(resources/container.jpg resources/container.jpg COPY_ONLY)
 
 if(ANDROID)
 	add_library(Viewer3D SHARED
