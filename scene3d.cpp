@@ -1,4 +1,6 @@
 #include "scene3d.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {

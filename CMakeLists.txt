@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
 	mainwindow.h
 	scene3d.cpp
 	scene3d.h
+	stb_image.h
 	${TS_FILES}
 )
 
