@@ -10,6 +10,7 @@
 #define N_ELEMENTITEMS (3)
 #define N_VERTICES (4)
 #define N_COLORARGS (3)
+#define N_TEXAXES (2)
 #endif
 #include <QDebug>
 
@@ -27,7 +28,7 @@ public:
 	~Scene3D();
 
 	QSize sizeHint() const override;
-	
+
 protected:
 	void initializeGL() override;
 	void paintGL() override;
@@ -38,7 +39,7 @@ protected slots:
 	
 private:
 	QSurfaceFormat *mp_glSurface;
-	float mp_vertices[N_VERTICES*(N_AXES + N_COLORARGS)];
+	float mp_vertices[N_VERTICES*(N_AXES+N_COLORARGS+N_TEXAXES)];
 	unsigned int mp_indices[N_ELEMENTS*N_ELEMENTITEMS];
 	const char *m_vertexShaderSource;
 	const char *m_fragmentShaderSource;
@@ -49,6 +50,10 @@ private:
 	unsigned int m_shaderProgram;
 	QTimer *mp_timer;
 	float m_green;
+
+	unsigned int m_texture;
+	int m_width, m_height, m_nrChannels;
+	unsigned char * mp_textureData;
 };
 
 #endif	// SCENE3D_H
