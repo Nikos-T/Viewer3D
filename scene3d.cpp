@@ -1,9 +1,5 @@
 #include "scene3d.h"
-
-
-#include "scene3d.h"
 #include "shaderprogram.h"
-
 
 
 
@@ -33,25 +29,6 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 		qDebug() << "Indices sizes not equal";
 	}
 	
-	// vertex shader
-	m_vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"layout (location = 1) in vec3 aColor;\n"
-		"out vec3 ourColor;\n"
-		"void main()\n"
-		"{\n"
-		"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.f);\n"
-		"	ourColor = aColor;"
-		"}\0";
-		
-	// fragment shader
-	m_fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"in vec3 ourColor;\n"
-		"void main()\n"
-		"{\n"
-		"   FragColor = vec4(ourColor, 1.f);\n"
-		"}\n\0";
 }
 
 Scene3D::~Scene3D()
