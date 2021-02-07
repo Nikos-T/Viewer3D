@@ -1,8 +1,5 @@
 #include "scene3d.h"
 
-
-#include "scene3d.h"
-
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
