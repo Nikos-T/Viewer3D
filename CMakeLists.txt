@@ -24,9 +24,15 @@ set(PROJECT_SOURCES
 	mainwindow.h
 	scene3d.cpp
 	scene3d.h
+        shaderprogram.cpp
+        shaderprogram.h
+        shaders/default.vert
+        shaders/default.frag
 	${TS_FILES}
 )
 
+configure_file(shaders/default.vert shaders/default.vert COPY_ONLY)
+configure_file(shaders/default.frag shaders/default.frag COPY_ONLY)
 
 if(ANDROID)
 	add_library(Viewer3D SHARED

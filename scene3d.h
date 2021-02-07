@@ -17,6 +17,7 @@
 #include <QOpenGLExtraFunctions>
 #include <QTimer>
 #include <QtMath>
+#include "shaderprogram.h"
 
 class Scene3D : public QGLWidget, protected QOpenGLExtraFunctions
 {
@@ -46,7 +47,7 @@ private:
 	unsigned int m_vbo;
 	unsigned int m_ebo;
 	unsigned int m_vao;
-	unsigned int m_shaderProgram;
+    ShaderProgram shader;
 	QTimer *mp_timer;
 	float m_green;
 };

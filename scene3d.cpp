@@ -2,6 +2,10 @@
 
 
 #include "scene3d.h"
+#include "shaderprogram.h"
+
+
+
 
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {
@@ -73,51 +77,9 @@ void Scene3D::initializeGL()
 	qDebug() << reinterpret_cast<const char *>(glGetString(GL_RENDERER));
 	// glViewport(0, 0, 800, 600);
 
-	// build and compile our shader program
-	// ------------------------------------
-	// vertex shader
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &m_vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-	// check for shader compile errors
-	#ifdef GLDEBUG
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-			qDebug() << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog;
-	}
-	#endif
-	// fragment shader
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &m_fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	// check for shader compile errors
-	#ifdef GLDEBUG
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-			qDebug() << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog;
-	}
-	#endif
-	// link shaders
-	m_shaderProgram = glCreateProgram();
-	glAttachShader(m_shaderProgram, vertexShader);
-	glAttachShader(m_shaderProgram, fragmentShader);
-	glLinkProgram(m_shaderProgram);
-	// check for linking errors
-	#ifdef GLDEBUG
-	glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-			glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
-			qDebug() << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog;
-	}
-	#endif
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+    // build, compile and start our shader program
+    shader.init("default");
+    shader.start();
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -156,7 +118,6 @@ void Scene3D::initializeGL()
 void Scene3D::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(m_shaderProgram);
 
 	// if (m_green < 1.f) {
 	// 	m_green += 0.005f;
@@ -174,12 +135,14 @@ void Scene3D::paintGL()
 	glDrawElements(GL_TRIANGLES, N_ELEMENTS*3, GL_UNSIGNED_INT, 0);
 	// glDrawArrays(GL_TRIANGLES, 0, sizeof(mp_vertices)/(3*sizeof(float)));
 	// glBindVertexArray(0);
+
 }
 
 void Scene3D::resizeGL(int w, int h)
 {
 	int side = qMin(w, h);
 	glViewport((w - side) / 2, (h - side) / 2, side, side);
+
 }
 
 void Scene3D::closeEvent(QCloseEvent *event)
@@ -189,6 +152,6 @@ void Scene3D::closeEvent(QCloseEvent *event)
 	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vbo);
 	glDeleteBuffers(1, &m_ebo);
-	glDeleteProgram(m_shaderProgram);
+    //glDeleteProgram(m_shaderProgram);
 	doneCurrent();	
 }
