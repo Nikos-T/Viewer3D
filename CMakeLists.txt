@@ -24,19 +24,11 @@ set(PROJECT_SOURCES
 	mainwindow.h
 	scene3d.cpp
 	scene3d.h
-        shaderprogram.cpp
-        shaderprogram.h
-        shaders/default.vert
-        shaders/default.frag
-	stb_image.h
-        resources/container.jpg
-
+	shaderprogram.cpp
+	shaderprogram.h
 	${TS_FILES}
 )
 
-configure_file(shaders/default.vert shaders/default.vert COPY_ONLY)
-configure_file(shaders/default.frag shaders/default.frag COPY_ONLY)
-configure_file(resources/container.jpg resources/container.jpg COPY_ONLY)
 
 if(ANDROID)
 	add_library(Viewer3D SHARED
@@ -47,6 +39,21 @@ else()
 		${PROJECT_SOURCES}
 	)
 endif()
+
+# resources
+file(GLOB files "resources/*")
+foreach(file ${files})
+	get_filename_component(name ${file} NAME)
+	message(${name})
+	configure_file(${file} resources/${name} COPYONLY)
+endforeach()
+
+# shaders
+file(GLOB files "shaders/*")
+foreach(file ${files})
+	get_filename_component(name ${file} NAME)
+	configure_file(${file} shaders/${name}. COPYONLY)
+endforeach()
 
 qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 message(${QM_FILES})
