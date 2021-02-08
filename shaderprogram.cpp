@@ -1,7 +1,6 @@
 #include "shaderprogram.h"
 #include <iostream>
 #include <fstream>
-
 GLuint ShaderProgram::currentProg = 0;
 
 ShaderProgram::ShaderProgram(){
@@ -12,8 +11,9 @@ void ShaderProgram::init(std::string shaderName)
 {
     if (programID != 0) std::cout << "ShaderProgram already initialized!" << std::endl;
     initializeOpenGLFunctions();
-    unsigned int vertexShader = prepareShader(GL_VERTEX_SHADER, "shaders/" +shaderName+ ".vert");
-    unsigned int fragmentShader = prepareShader(GL_FRAGMENT_SHADER, "shaders/" + shaderName +".frag");
+		
+    unsigned int vertexShader = prepareShader(GL_VERTEX_SHADER, shaderName + ".vert");
+    unsigned int fragmentShader = prepareShader(GL_FRAGMENT_SHADER, shaderName +".frag");
 
     programID = glCreateProgram();
     glAttachShader(programID, vertexShader);

@@ -52,7 +52,7 @@ endforeach()
 file(GLOB files "shaders/*")
 foreach(file ${files})
 	get_filename_component(name ${file} NAME)
-	configure_file(${file} shaders/${name}. COPYONLY)
+	configure_file(${file} shaders/${name} COPYONLY)
 endforeach()
 
 qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})

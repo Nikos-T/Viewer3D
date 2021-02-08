@@ -66,9 +66,10 @@ void Scene3D::initializeGL()
 	qDebug() << reinterpret_cast<const char *>(glGetString(GL_RENDERER));
 	// glViewport(0, 0, 800, 600);
 
-    // build, compile and start our shader program
-    shader.init("default");
-    shader.start();
+	// build, compile and start our shader program
+	std::string appDir = QCoreApplication::applicationDirPath().toStdString();
+	shader.init(appDir + "/shaders/default");
+	shader.start();
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
