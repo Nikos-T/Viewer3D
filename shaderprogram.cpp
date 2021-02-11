@@ -77,6 +77,81 @@ void ShaderProgram::stop(){
     ShaderProgram::currentProg = 0;
 }
 
+GLuint ShaderProgram::getUniformLocation(const std::string &name){
+    GLintDefault loc = uniformLocs[name];
+    if (loc.val == -2)
+    {
+        //hasnt been cached yet
+        loc.val = glGetUniformLocation(programID, name.c_str());
+        uniformLocs[name] = loc;
+        if (loc.val == -1){
+            std::cout << "No uniform with name '" << name << "' in shader" << std::endl;
+        }
+        else{
+            std::cout << "Cached uniform with name '" << name << "' with id:" << loc.val << std::endl;
+        }
+    }
+    return loc.val;
+}
+
+void ShaderProgram::loadFloat(const std::string &name, GLfloat data){
+    glUniform1f(getUniformLocation(name), data);
+}
+
+void ShaderProgram::loadInt(const std::string &name, GLint data){
+    glUniform1i(getUniformLocation(name), data);
+}
+
+void ShaderProgram::loadBoolean(const std::string &name, bool value){
+    glUniform1f(getUniformLocation(name), (value ? 1.0f : 0.0f));
+}
+
+void ShaderProgram::loadVector3f(const std::string &name, GLfloat x, GLfloat y, GLfloat z){
+    glUniform3f(getUniformLocation(name), x, y, z);
+}
+
+void ShaderProgram::loadVector2f(const std::string &name, GLfloat x, GLfloat y){
+    glUniform2f(getUniformLocation(name), x, y);
+}
+
+void ShaderProgram::loadVector4f(const std::string &name, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
+    glUniform4f(getUniformLocation(name), x, y, z, w);
+}
+
+void ShaderProgram::loadFloat(GLuint loc, GLfloat data){
+    glUniform1f(loc, data);
+}
+
+void ShaderProgram::loadInt(GLuint loc, GLint data){
+    glUniform1i(loc, data);
+}
+
+void ShaderProgram::loadBoolean(GLuint loc, bool value){
+    glUniform1f(loc, (value ? 1.0f : 0.0f));
+}
+
+void ShaderProgram::loadMatrix4f(const std::string& name, glm::mat4 mat4)
+{
+    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat4));
+}
+
+void ShaderProgram::loadMatrix4f(GLuint loc, glm::mat4 mat4)
+{
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat4));
+}
+
+void ShaderProgram::loadVector3f(GLuint loc, GLfloat x, GLfloat y, GLfloat z){
+    glUniform3f(loc, x, y, z);
+}
+
+void ShaderProgram::loadVector2f(GLuint loc, GLfloat x, GLfloat y){
+    glUniform2f(loc, x, y);
+}
+
+void ShaderProgram::loadVector4f(GLuint loc, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
+    glUniform4f(loc, x, y, z, w);
+}
+
 std::string ShaderProgram::readFile(const std::string& filePath) {
     std::string content;
     std::ifstream fileStream(filePath, std::ios::in);

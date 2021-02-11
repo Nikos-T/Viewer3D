@@ -1,11 +1,24 @@
 #include "scene3d.h"
 #include "shaderprogram.h"
+#include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include <QDir>
 #include <QApplication>
 
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+
+glm::mat4 camera(float Translate, glm::vec2 const & Rotate)
+{
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.f);
+    glm::mat4 View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -Translate));
+    View = glm::rotate(View, glm::radians(Rotate.y), glm::vec3(-1.0f, 0.0f, 0.0f));
+    View = glm::rotate(View, glm::radians(Rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 Model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+    return Projection * View * Model;
+}
 
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {
@@ -33,19 +46,12 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 	} else {
 		qDebug() << "Indices sizes not equal";
 	}
-	
-
-	// texture
-    QDir imagePath = QDir(QApplication::applicationDirPath() + "/resources/container.jpg");
-	mp_textureData = stbi_load(imagePath.absolutePath().toUtf8(), &m_width, &m_height, &m_nrChannels, 0);
-	qDebug() << sizeof(mp_textureData) << m_width << m_height << m_nrChannels;
-
 
 }
 
 Scene3D::~Scene3D()
 {
-	
+    delete texture;
 }
 
 QSize Scene3D::sizeHint() const
@@ -56,11 +62,12 @@ QSize Scene3D::sizeHint() const
 void Scene3D::initializeGL()
 {
 
-	mp_timer = new QTimer(this);
-	mp_timer->setSingleShot(false);
-	mp_timer->setInterval(1000.0/60.0);
-	connect(mp_timer, &QTimer::timeout, this, &Scene3D::paintGL);
-	m_green = 0;
+    mp_timer = new QTimer(this);
+    mp_timer->setSingleShot(false);
+    mp_timer->setInterval(1000.0/60.0);
+    connect(mp_timer, &QTimer::timeout, this, &Scene3D::paintGL);
+    connect(mp_timer, SIGNAL(timeout()), this, SLOT(update()));
+    mp_timer->start();
 
 	initializeOpenGLFunctions();
 	qDebug() << reinterpret_cast<const char *>(glGetString(GL_RENDERER));
@@ -104,25 +111,17 @@ void Scene3D::initializeGL()
 	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 	// glBindVertexArray(0); 
 	
-	glGenTextures(1, &m_texture); 
-	glBindTexture(GL_TEXTURE_2D, m_texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (mp_textureData) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, mp_textureData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
-		qDebug() << "Failed to load texture";
-	}
-	stbi_image_free(mp_textureData);
+    texture = new Texture("container.jpg");
+    texture->bind(0);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	// mp_timer->start();
-	connect(mp_timer, SIGNAL(timeout()), this, SLOT(update()));
+
+    //connect(mp_timer, SIGNAL(timeout()), this, SLOT(update()));
+    //mp_timer->start();
+    //timer
 }
 
+float rotation = 0;
 void Scene3D::paintGL()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -139,6 +138,9 @@ void Scene3D::paintGL()
 	// 	qDebug() << "Couldn't find \"ourColor\"";
 	// }
 
+    rotation += 20.0f*deltaTime();
+
+    shader.loadMatrix4f("pvm", camera(2+sin(rotation*0.01f), glm::vec2(0,rotation)));
 	// glBindTexture(GL_TEXTURE_2D, m_texture);
 	// glBindVertexArray(m_vao); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 	glDrawElements(GL_TRIANGLES, N_ELEMENTS*N_ELEMENTITEMS, GL_UNSIGNED_INT, 0);
@@ -152,6 +154,10 @@ void Scene3D::resizeGL(int w, int h)
 	int side = qMin(w, h);
 	glViewport((w - side) / 2, (h - side) / 2, side, side);
 
+}
+
+float Scene3D::deltaTime(){
+    return (mp_timer->remainingTime())*0.001f;
 }
 
 void Scene3D::closeEvent(QCloseEvent *event)

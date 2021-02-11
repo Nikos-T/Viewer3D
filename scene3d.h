@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QtMath>
 #include "shaderprogram.h"
+#include "texture.h"
 
 class Scene3D : public QGLWidget, protected QOpenGLExtraFunctions
 {
@@ -29,10 +30,10 @@ public:
 	~Scene3D();
 
 	QSize sizeHint() const override;
-
+    void paintGL() override;
 protected:
 	void initializeGL() override;
-	void paintGL() override;
+
 	void resizeGL(int w, int h) override;
 
 	void closeEvent(QCloseEvent *event) override;
@@ -49,11 +50,11 @@ private:
 	unsigned int m_ebo;
 	unsigned int m_vao;
     ShaderProgram shader;
-	QTimer *mp_timer;
+    QTimer *mp_timer;
+    float deltaTime();
 	float m_green;
 
-	unsigned int m_texture;
-	int m_width, m_height, m_nrChannels;
+    Texture *texture;
 	unsigned char * mp_textureData;
 };
 

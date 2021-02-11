@@ -16,6 +16,40 @@ set(QT_QMAKE_EXECUTABLE /opt/Qt/5.15.2/gcc_64/bin/qmake)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools OpenGL REQUIRED)
 
+# We need a CMAKE_DIR with some code to find external dependencies
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+#
+#######################################
+# LOOK for the packages that we need! #
+#######################################
+
+# GLM
+find_package(GLM REQUIRED)
+message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
+
+# ASSIMP
+#find_package(ASSIMP REQUIRED)
+#message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
+
+# STB_IMAGE
+#add_library(STB_IMAGE "thirdparty/stb_image.cpp")
+#
+# GLAD
+#add_library(GLAD "thirdparty/glad.c")
+
+# Put all libraries into a variable
+#set(LIBS glfw3 opengl32 assimp STB_IMAGE GLAD)
+#set(LIBS glm)
+#
+# Define the include DIRs
+include_directories(
+        #"${CMAKE_SOURCE_DIR}/src"
+        "${CMAKE_SOURCE_DIR}/include"
+)
+
+# Define the link libraries
+#target_link_libraries(${PROJECT_NAME} ${LIBS})
+
 set(TS_FILES Viewer3D_el_GR.ts)
 message(${TS_FILES})
 set(PROJECT_SOURCES
@@ -26,6 +60,8 @@ set(PROJECT_SOURCES
 	scene3d.h
 	shaderprogram.cpp
 	shaderprogram.h
+        texture.cpp
+        texture.h
 	${TS_FILES}
 )
 
