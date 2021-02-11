@@ -16,66 +16,70 @@ set(QT_QMAKE_EXECUTABLE /opt/Qt/5.15.2/gcc_64/bin/qmake)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools OpenGL REQUIRED)
 
+
+# Define the link libraries
+#target_link_libraries(${PROJECT_NAME} ${LIBS})
+#link_directories(${CMAKE_SOURCE_DIR}/lib)
+#
+set(TS_FILES Viewer3D_el_GR.ts)
+message(${TS_FILES})
+
+# Add .lib files
+link_directories(${CMAKE_SOURCE_DIR}/lib)
+
+# Add source files
+file(GLOB_RECURSE SOURCE_FILES
+        ${CMAKE_SOURCE_DIR}/src/*.c
+        ${CMAKE_SOURCE_DIR}/src/*.cpp)
+
+# Add header files
+file(GLOB_RECURSE HEADER_FILES
+        ${CMAKE_SOURCE_DIR}/src/*.h
+        ${CMAKE_SOURCE_DIR}/src/*.hpp)
+
+
+# Configure assets header file
+configure_file(src/helpers/RootDir.h.in src/helpers/RootDir.h)
+# Define the include DIRs
+include_directories(${CMAKE_BINARY_DIR}/src)
+
+if(ANDROID)
+	add_library(Viewer3D SHARED
+                ${HEADER_FILES} ${SOURCE_FILES}
+	)
+else()
+	add_executable(Viewer3D
+                ${HEADER_FILES} ${SOURCE_FILES}
+	)
+endif()
+
 # We need a CMAKE_DIR with some code to find external dependencies
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-#
+
 #######################################
 # LOOK for the packages that we need! #
 #######################################
-
+#
+#
 # GLM
 find_package(GLM REQUIRED)
 message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
 
 # ASSIMP
-#find_package(ASSIMP REQUIRED)
-#message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
-
-# STB_IMAGE
-#add_library(STB_IMAGE "thirdparty/stb_image.cpp")
-#
-# GLAD
-#add_library(GLAD "thirdparty/glad.c")
-
-# Put all libraries into a variable
-#set(LIBS glfw3 opengl32 assimp STB_IMAGE GLAD)
-#set(LIBS glm)
-#
-# Define the include DIRs
-include_directories(
-        #"${CMAKE_SOURCE_DIR}/src"
-        "${CMAKE_SOURCE_DIR}/include"
-)
-
-# Define the link libraries
-#target_link_libraries(${PROJECT_NAME} ${LIBS})
-
-set(TS_FILES Viewer3D_el_GR.ts)
-message(${TS_FILES})
-set(PROJECT_SOURCES
-	main.cpp
-	mainwindow.cpp
-	mainwindow.h
-	scene3d.cpp
-	scene3d.h
-	shaderprogram.cpp
-	shaderprogram.h
-        texture.cpp
-        texture.h
-	${TS_FILES}
-)
-
-
-if(ANDROID)
-	add_library(Viewer3D SHARED
-		${PROJECT_SOURCES}
-	)
-else()
-	add_executable(Viewer3D
-		${PROJECT_SOURCES}
-	)
+find_package(ASSIMP REQUIRED)
+message(STATUS "Found ASSIMP at ${ASSIMP_INCLUDE_DIR}")
+if(ASSIMP_FOUND)
+    include_directories(${ASSIMP_INCLUDE_DIR})
 endif()
 
+set(LIBS assimp)
+
+# Define the include DIRs
+include_directories(
+        "${CMAKE_SOURCE_DIR}/src"
+        "${CMAKE_SOURCE_DIR}/include"
+)
+#
 # resources
 file(GLOB files "resources/*")
 foreach(file ${files})
@@ -93,4 +97,4 @@ endforeach()
 
 qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 message(${QM_FILES})
-target_link_libraries(Viewer3D PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::OpenGL)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::OpenGL ${LIBS})
