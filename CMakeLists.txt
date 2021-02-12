@@ -22,7 +22,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 #######################################
 # LOOK for the packages that we need! #
 #######################################
-
+#
 # GLM
 find_package(GLM REQUIRED)
 message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
@@ -62,6 +62,8 @@ set(PROJECT_SOURCES
 	shaderprogram.h
         texture.cpp
         texture.h
+        mesh.cpp
+        mesh.h
 	${TS_FILES}
 )
 
