@@ -42,3 +42,23 @@ endif()
 qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 message(${QM_FILES})
 target_link_libraries(Viewer3D PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::OpenGL)
+
+
+# copy folder resources and its contents
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+	message(STATUS "Build type not specified: Use Release by default")
+endif(NOT CMAKE_BUILD_TYPE)
+
+file(GLOB files "resources/**/*")
+foreach(file ${files})
+	get_filename_component(name ${file} NAME)
+	get_filename_component(folder ${file} PATH)
+	string(REPLACE "${CMAKE_SOURCE_DIR}/" "" folder "${folder}")
+	message(STATUS "path to copy = ${folder}/${name}")
+	if (MSVC)
+		configure_file(${file} "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${folder}/${name}" COPYONLY)
+	else()
+		configure_file(${file} "${CMAKE_CURRENT_BINARY_DIR}/${folder}/${name}" COPYONLY)
+	endif()
+endforeach()

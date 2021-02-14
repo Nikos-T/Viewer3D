@@ -12,12 +12,15 @@
 #define N_COLORARGS (3)
 #define N_TEXAXES (2)
 #endif
-#include <QDebug>
 
 #include <QGLWidget>
+#include <QDir>
+#include <QApplication>
 #include <QOpenGLExtraFunctions>
 #include <QTimer>
 #include <QtMath>
+
+#include <QDebug>
 
 class Scene3D : public QGLWidget, protected QOpenGLExtraFunctions
 {

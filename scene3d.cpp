@@ -1,8 +1,8 @@
 #include "scene3d.h"
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include <QDir>
-#include <QApplication>
+#endif
 
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {
@@ -58,7 +58,7 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 		"}\n\0";
 
 	// texture
-	QDir imagePath = QDir(QApplication::applicationDirPath() + "/../resources/container.jpg");
+	QDir imagePath = QDir(QApplication::applicationDirPath() + "/resources/images/container.jpg");
 	mp_textureData = stbi_load(imagePath.absolutePath().toUtf8(), &m_width, &m_height, &m_nrChannels, 0);
 	qDebug() << sizeof(mp_textureData) << m_width << m_height << m_nrChannels;
 
@@ -100,8 +100,8 @@ void Scene3D::initializeGL()
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-			qDebug() << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog;
+		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+		qDebug() << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog;
 	}
 	#endif
 	// fragment shader
@@ -113,8 +113,8 @@ void Scene3D::initializeGL()
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-			qDebug() << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog;
+		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+		qDebug() << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog;
 	}
 	#endif
 	// link shaders
@@ -126,8 +126,8 @@ void Scene3D::initializeGL()
 	#ifdef GLDEBUG
 	glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success);
 	if (!success) {
-			glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
-			qDebug() << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog;
+		glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
+		qDebug() << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog;
 	}
 	#endif
 	glDeleteShader(vertexShader);
