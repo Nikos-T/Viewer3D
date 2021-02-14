@@ -22,6 +22,15 @@
 
 #include <QDebug>
 
+struct TextureStruct
+{
+	unsigned int texture;
+	unsigned char * data;
+	int width;
+	int height;
+	int nrChannels;
+};
+
 class Scene3D : public QGLWidget, protected QOpenGLExtraFunctions
 {
 	Q_OBJECT
@@ -41,6 +50,8 @@ protected:
 protected slots:
 	
 private:
+	void compileShaders();
+
 	QSurfaceFormat *mp_glSurface;
 	float mp_vertices[N_VERTICES*(N_AXES+N_COLORARGS+N_TEXAXES)];
 	unsigned int mp_indices[N_ELEMENTS*N_ELEMENTITEMS];
@@ -54,9 +65,10 @@ private:
 	QTimer *mp_timer;
 	float m_green;
 
-	unsigned int m_texture;
-	int m_width, m_height, m_nrChannels;
-	unsigned char * mp_textureData;
+	// unsigned int m_texture;
+	// int m_width, m_height, m_nrChannels;
+	QList<TextureStruct> m_textures;	// container of textureData
+	// unsigned char * mp_textureData;
 };
 
 #endif	// SCENE3D_H
