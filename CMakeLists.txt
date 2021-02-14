@@ -13,18 +13,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_PREFIX_PATH /opt/Qt/5.15.2/gcc_64/bin)
 set(QT_QMAKE_EXECUTABLE /opt/Qt/5.15.2/gcc_64/bin/qmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools OpenGL REQUIRED)
 
+find_package(GLM REQUIRED)
+if(GLM_FOUND)
+	include_directories(${GLM_INCLUDE_DIR})
+endif()
+
 set(TS_FILES Viewer3D_el_GR.ts)
-message(${TS_FILES})
+
 set(PROJECT_SOURCES
 	main.cpp
 	mainwindow.cpp
 	mainwindow.h
 	scene3d.cpp
 	scene3d.h
-	stb_image.h
+	include/stb_image.h
 	${TS_FILES}
 )
 
