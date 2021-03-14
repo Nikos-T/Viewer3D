@@ -19,7 +19,9 @@
 #include <QOpenGLExtraFunctions>
 #include <QTimer>
 #include <QtMath>
-
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include <QDebug>
 
 struct TextureStruct
@@ -55,8 +57,9 @@ private:
 	QSurfaceFormat *mp_glSurface;
 	float mp_vertices[N_VERTICES*(N_AXES+N_COLORARGS+N_TEXAXES)];
 	unsigned int mp_indices[N_ELEMENTS*N_ELEMENTITEMS];
-	const char *m_vertexShaderSource;
-	const char *m_fragmentShaderSource;
+	QString m_vertexDir;
+	QString m_fragmentDir;
+	QString sourceFromFile(const QString &fileDir) const;
 
 	unsigned int m_vbo;
 	unsigned int m_ebo;
@@ -64,7 +67,8 @@ private:
 	unsigned int m_shaderProgram;
 	QTimer *mp_timer;
 	float m_green;
-
+	glm::mat4 m_trans;
+	unsigned int m_transformLoc;
 	// unsigned int m_texture;
 	// int m_width, m_height, m_nrChannels;
 	QList<TextureStruct> m_textures;	// container of textureData

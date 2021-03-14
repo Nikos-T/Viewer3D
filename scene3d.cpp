@@ -4,6 +4,10 @@
 #include "stb_image.h"
 #endif
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 {
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -31,32 +35,10 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 		qDebug() << "Indices sizes not equal";
 	}
 	
-	// vertex shader
-	m_vertexShaderSource = "#version 330 core\n\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"layout (location = 1) in vec3 aColor;\n"
-		"layout (location = 2) in vec2 aTexCoord;\n"
-		"out vec3 ourColor;\n"
-		"out vec2 TexCoord;\n\n"
-		"void main()\n"
-		"{\n"
-		"  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.f);\n"
-		"  ourColor = aColor;\n"
-		"  TexCoord = aTexCoord;\n"
-		"}\n\0";
-		
-	// fragment shader
-	m_fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"in vec3 ourColor;\n"
-		"in vec2 TexCoord;\n"
-		"uniform sampler2D texture0;\n"
-		"uniform sampler2D texture1;\n"
-		"void main()\n"
-		"{\n"
-		"  FragColor = mix(texture(texture0, TexCoord), texture(texture1, TexCoord), 0.8);\n"
-		"}\n\0";
-// "	FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);\n"
+	// shaders
+	m_vertexDir = QString::fromUtf8("./resources/shaders/default.vert");
+	m_fragmentDir = QString::fromUtf8("./resources/shaders/default.frag");
+
 	// textures
 	QDir imagePath = QDir(QApplication::applicationDirPath() + "/resources/images");
 	QStringList imageFileExtensions = {"*.jpg", "*.png"};
@@ -67,9 +49,9 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
 	}
 	stbi_set_flip_vertically_on_load(true);
 	foreach(QString fileName, images) {
-		std::string filePath = imagePath.absolutePath().toStdString() + "/" + fileName.toStdString();
+		QString filePath = QDir::toNativeSeparators(imagePath.absolutePath() + "/" + fileName);
 		TextureStruct texData;
-		texData.data = stbi_load(filePath.c_str(), &texData.width, &texData.height, &texData.nrChannels, 0);
+		texData.data = stbi_load(filePath.toLatin1(), &texData.width, &texData.height, &texData.nrChannels, 0);
 		m_textures.append(texData);
 		#ifdef GLDEBUG
 		qDebug().nospace() << fileName << " texture loaded: textureDataSize=" << sizeof(texData.data) <<", size=" << texData.width << "x" << texData.height << ", channels=" << texData.nrChannels;
@@ -139,7 +121,7 @@ void Scene3D::initializeGL()
 	unsigned int i = 0;
 	foreach (TextureStruct tex, m_textures) {
 		glGenTextures(1, &tex.texture);
-		qDebug() << tex.texture;
+		// qDebug() << tex.texture;
 		glActiveTexture(GL_TEXTURE0+i);
 		glBindTexture(GL_TEXTURE_2D, tex.texture);
 
@@ -166,15 +148,24 @@ void Scene3D::initializeGL()
 		stbi_image_free(tex.data);
 		i++;
 	}
-
+	// We also have to tell OpenGL to which texture unit each shader sampler belongs to by setting each sampler using glUniform1i. We only have to set this once, so we can do this before we enter the render loop: 
 	glUseProgram(m_shaderProgram);
-	glUniform1i(glGetUniformLocation(m_shaderProgram, "texture0"), 0);
-	glUniform1i(glGetUniformLocation(m_shaderProgram, "texture1"), 1);
+	do {
+		i--;
+		glUniform1i(glGetUniformLocation(m_shaderProgram, (QString("texture")+QString::number(i)).toLatin1()), i);
+	} while (i != 0); //By setting the samplers via glUniform1i we make sure each uniform sampler corresponds to the proper texture unit.
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+	/* testing transform */
+	m_trans = glm::mat4(1.0f);
+	m_trans = glm::translate(m_trans, glm::vec3(0.5, -0.5, 0.));
+
+	m_transformLoc = glGetUniformLocation(m_shaderProgram, "transform");
+	glUniformMatrix4fv(m_transformLoc, 1, GL_FALSE, glm::value_ptr(m_trans));
 	// mp_timer->start();
 	// connect(mp_timer, SIGNAL(timeout()), this, SLOT(update()));
-}
+} 
 
 void Scene3D::paintGL()
 {
@@ -192,6 +183,8 @@ void Scene3D::paintGL()
 	// } else {
 	// 	qDebug() << "Couldn't find \"ourColor\"";
 	// }
+	m_trans = glm::rotate(m_trans, 0.1f, glm::vec3(0.0, 0.0, 1.0f));
+	glUniformMatrix4fv(m_transformLoc, 1, GL_FALSE, glm::value_ptr(m_trans));
 
 	// glBindTexture(GL_TEXTURE_2D, m_texture);
 	// glBindVertexArray(m_vao); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
@@ -203,7 +196,8 @@ void Scene3D::paintGL()
 void Scene3D::resizeGL(int w, int h)
 {
 	int side = qMin(w, h);
-	glViewport((w - side) / 2, (h - side) / 2, side, side);
+	// glViewport((w - side) / 2, (h - side) / 2, side, side);
+	glViewport(0, 0, w, h);
 }
 
 void Scene3D::closeEvent(QCloseEvent *event)
@@ -222,8 +216,10 @@ void Scene3D::compileShaders()
 	// build and compile our shader program
 	// ------------------------------------
 	// vertex shader
+	QString vertexSource = sourceFromFile(m_vertexDir);
+	const char * vertexSourceC = vertexSource.toLatin1();
 	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &m_vertexShaderSource, NULL);
+	glShaderSource(vertexShader, 1, &vertexSourceC, NULL);
 	glCompileShader(vertexShader);
 	// check for shader compile errors
 	#ifdef GLDEBUG
@@ -237,8 +233,10 @@ void Scene3D::compileShaders()
 	}
 	#endif
 	// fragment shader
+	QString fragmentSource = sourceFromFile(m_fragmentDir);
+	const char * fragmentSourceC = fragmentSource.toLatin1();
 	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &m_fragmentShaderSource, NULL);
+	glShaderSource(fragmentShader, 1, &fragmentSourceC, NULL);
 	glCompileShader(fragmentShader);
 	// check for shader compile errors
 	#ifdef GLDEBUG
@@ -268,4 +266,11 @@ void Scene3D::compileShaders()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+}
+
+QString Scene3D::sourceFromFile(const QString &fileDir) const
+{
+	QFile file(QDir::toNativeSeparators(fileDir));
+	file.open(QIODevice::ReadOnly);	// file is closed automatically when deleted.
+	return QString(file.readAll());
 }

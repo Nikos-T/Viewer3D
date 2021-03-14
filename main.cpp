@@ -1,7 +1,9 @@
-#include "mainwindow.h"
 
 #include <QApplication>
 #include <QTranslator>
+
+#include "mainwindow.h"
+
 #include <QDebug>
 
 int main(int argc, char *argv[])
@@ -18,7 +20,6 @@ int main(int argc, char *argv[])
 	format.setVersion(3, 3);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	QSurfaceFormat::setDefaultFormat(format);
-
 
 	//Translator
 	a.installTranslator(&translator);

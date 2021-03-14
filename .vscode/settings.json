@@ -1,6 +1,7 @@
 {
 	"files.associations": {
 		"*.ts": "xml",
+		"*.frag": "glsl",
 		"cctype": "cpp",
 		"clocale": "cpp",
 		"cmath": "cpp",
@@ -61,6 +62,7 @@
 		"csignal": "cpp",
 		"condition_variable": "cpp",
 		"mutex": "cpp",
-		"typeindex": "cpp"
+		"typeindex": "cpp",
+		"qtmath": "cpp"
 	}
 }
