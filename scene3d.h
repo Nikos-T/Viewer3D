@@ -67,8 +67,9 @@ private:
 	unsigned int m_shaderProgram;
 	QTimer *mp_timer;
 	float m_green;
-	glm::mat4 m_trans;
-	unsigned int m_transformLoc;
+	glm::mat4 m_model, m_view, m_projection;
+	unsigned int m_modelLoc, m_viewLoc, m_projectionLoc;
+
 	// unsigned int m_texture;
 	// int m_width, m_height, m_nrChannels;
 	QList<TextureStruct> m_textures;	// container of textureData

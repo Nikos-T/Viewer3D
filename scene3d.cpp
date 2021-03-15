@@ -158,11 +158,22 @@ void Scene3D::initializeGL()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	/* testing transform */
-	m_trans = glm::mat4(1.0f);
-	m_trans = glm::translate(m_trans, glm::vec3(0.5, -0.5, 0.));
+	m_model = glm::mat4(1.0f);
+	m_model = glm::rotate(m_model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	m_modelLoc = glGetUniformLocation(m_shaderProgram, "modelMat");
+	glUniformMatrix4fv(m_modelLoc, 1, GL_FALSE, glm::value_ptr(m_model));
 
-	m_transformLoc = glGetUniformLocation(m_shaderProgram, "transform");
-	glUniformMatrix4fv(m_transformLoc, 1, GL_FALSE, glm::value_ptr(m_trans));
+	m_view = glm::mat4(1.0f);
+	// note that we're translating the scene in the reverse direction of where we want to move
+	m_view = glm::translate(m_view, glm::vec3(0.0f, 0.0f, -3.0f));
+	m_viewLoc = glGetUniformLocation(m_shaderProgram, "viewMat");
+	glUniformMatrix4fv(m_viewLoc, 1, GL_FALSE, glm::value_ptr(m_view));
+
+	
+	m_projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	m_projectionLoc = glGetUniformLocation(m_shaderProgram, "projectionMat");
+	glUniformMatrix4fv(m_projectionLoc, 1, GL_FALSE, glm::value_ptr(m_projection));
+
 	// mp_timer->start();
 	// connect(mp_timer, SIGNAL(timeout()), this, SLOT(update()));
 } 
@@ -183,8 +194,6 @@ void Scene3D::paintGL()
 	// } else {
 	// 	qDebug() << "Couldn't find \"ourColor\"";
 	// }
-	m_trans = glm::rotate(m_trans, 0.1f, glm::vec3(0.0, 0.0, 1.0f));
-	glUniformMatrix4fv(m_transformLoc, 1, GL_FALSE, glm::value_ptr(m_trans));
 
 	// glBindTexture(GL_TEXTURE_2D, m_texture);
 	// glBindVertexArray(m_vao); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
@@ -203,6 +212,14 @@ void Scene3D::resizeGL(int w, int h)
 void Scene3D::closeEvent(QCloseEvent *event)
 {
 	makeCurrent();
+	// delete textures
+	GLuint texturesToDelete[m_textures.length()];
+	int i = 0;
+	foreach (TextureStruct tex, m_textures) {
+		texturesToDelete[i] = tex.texture;
+		i++;
+	}
+	glDeleteTextures(2, texturesToDelete);
 	// here we delete the opengl arrays
 	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vbo);
